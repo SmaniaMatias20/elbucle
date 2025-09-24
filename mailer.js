@@ -41,7 +41,7 @@ async function notifyUserStatus(user, statusString) {
           <img src="cid:logoimg" alt="logo" width="120" height="120">
         </div>
         `;
-    } else if (statusString === "rechazado") {
+    } else if (statusString === "inactivo") {
         mensaje = `
         <div style="font-family: Arial, sans-serif; color: #333;">
           <h2 style="color: #dc3545;">❌ Registro Rechazado</h2>
