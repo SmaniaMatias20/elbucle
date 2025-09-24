@@ -52,14 +52,14 @@ app.use(bodyParser.json());
 
 // Endpoint para enviar el mail de confirmación de registro
 app.post('/send-confirmation-mail', async (req, res) => {
-    const { name, email, status } = req.body;
-
+    console.log(req.body);
+    const { name, email, statusString } = req.body;
     if (!name || !email) return res.status(400).send('Faltan parámetros');
 
     const user = { name, email };
 
     // Enviar correo de confirmación
-    notifyUserStatus(user, status);
+    notifyUserStatus(user, statusString);
 
     res.send({ success: true, message: 'Correo enviado' });
 });

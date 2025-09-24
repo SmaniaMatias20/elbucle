@@ -19,7 +19,8 @@ transporter.verify((error, success) => {
 });
 
 
-async function notifyUserStatus(user, status) {
+async function notifyUserStatus(user, statusString) {
+    console.log(user, statusString);
     const { name, email } = user;
 
     if (!email) {
@@ -29,7 +30,7 @@ async function notifyUserStatus(user, status) {
 
     let mensaje = "";
 
-    if (status === "activo") {
+    if (statusString === "activo") {
         mensaje = `
         <div style="font-family: Arial, sans-serif; color: #333;">
           <h2 style="color: #28a745;">✅ Registro Aceptado</h2>
@@ -40,7 +41,7 @@ async function notifyUserStatus(user, status) {
           <img src="cid:logoimg" alt="logo" width="120" height="120">
         </div>
         `;
-    } else if (status === "rechazado") {
+    } else if (statusString === "rechazado") {
         mensaje = `
         <div style="font-family: Arial, sans-serif; color: #333;">
           <h2 style="color: #dc3545;">❌ Registro Rechazado</h2>
@@ -67,7 +68,7 @@ async function notifyUserStatus(user, status) {
                 }
             ],
         });
-        console.log(`✅ Correo enviado a ${email} (${status})`);
+        console.log(`✅ Correo enviado a ${email} (${statusString})`);
     } catch (error) {
         console.error(`❌ Error enviando correo a ${email}:`, error);
     }
