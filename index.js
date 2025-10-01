@@ -78,6 +78,76 @@ const supabase = createClient(
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRnbnZqbHpoYW94aGFmdHBkdXJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1NTUxNTEsImV4cCI6MjA2MDEzMTE1MX0.yjRBf1UdsEqWm8YBbB7NSXYtVqgLV_J65TTDvR_DWsQ'
 );
 
+
+app.post('/register-device', async (req, res) => {
+    const { token, userId } = req.body;
+
+    if (!token || !userId) {
+        return res.status(400).send('Faltan parámetros');
+    }
+
+    // Guardar el token en la base de datos (en este caso usando Supabase como ejemplo)
+    const { data, error } = await supabase
+        .from('user_tokens')
+        .upsert([{ user_id: userId, token }]);
+
+    if (error) {
+        return res.status(500).send('Error al guardar el token');
+    }
+
+    res.send({ success: true, message: 'Token registrado' });
+});
+
+// Endpoint para enviar la notificación push
+app.post('/send-push-notification', async (req, res) => {
+    const { userId, title, message } = req.body;
+
+    if (!userId || !title || !message) {
+        return res.status(400).send('Faltan parámetros');
+    }
+
+    // Obtener el token del dispositivo desde la base de datos
+    const { data, error } = await supabase
+        .from('user_tokens')
+        .select('token')
+        .eq('user_id', userId)
+        .single();
+
+    if (error || !data) {
+        return res.status(404).send('Token no encontrado');
+    }
+
+    const token = data.token;
+
+    // Enviar la notificación push usando Firebase Admin SDK
+    try {
+        const message = {
+            notification: {
+                title: title,
+                body: message,
+            },
+            token: token,
+        };
+
+        // Enviar la notificación
+        const response = await admin.messaging().send(message);
+        console.log('Notificación enviada:', response);
+        res.send({ success: true, message: 'Notificación enviada' });
+    } catch (error) {
+        console.error('Error al enviar la notificación:', error);
+        res.status(500).send('Error al enviar la notificación');
+    }
+});
+
+
+
+
+
+
+
+
+
+
 // Endpoint para enviar el mail de confirmación de registro
 app.post('/send-confirmation-mail', async (req, res) => {
     const { name, email, statusString } = req.body;
