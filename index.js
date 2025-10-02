@@ -10,15 +10,18 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 
 const corsOptions = {
-    origin: ['capacitor://localhost', 'http://localhost', 'http://localhost:8100'], // Orígenes permitidos
+    origin: ['capacitor://localhost', 'http://localhost', 'https://localhost'], // incluye tus orígenes reales
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true, // si usas cookies o auth con credenciales
+    credentials: true,
 };
 
-
 const app = express();
+// Usa CORS globalmente
 app.use(cors(corsOptions));
+
+// Asegúrate de manejar OPTIONS para todas las rutas (preflight)
+app.options('*', cors(corsOptions));
 app.use(bodyParser.json());
 dotenv.config();
 
