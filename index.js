@@ -20,7 +20,7 @@ const app = express();
 // Usa CORS globalmente
 app.use(cors(corsOptions));
 
-
+console.log("PRIVATE KEY", process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'));
 app.use(bodyParser.json());
 dotenv.config();
 
