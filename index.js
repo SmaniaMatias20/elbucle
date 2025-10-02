@@ -69,41 +69,42 @@ app.post('/send-push-notification', async (req, res) => {
         return res.status(400).send('Faltan parámetros');
     }
 
-    // Obtener el token del dispositivo desde la base de datos
+    // Obtener todos los tokens del usuario desde Supabase
     const { data, error } = await supabase
         .from('user_tokens')
         .select('device_token')
-        .eq('user_id', userId)
-        .single();
+        .eq('user_id', userId);
 
-    if (error || !data) {
-        console.log(data);
+    if (error || !data || data.length === 0) {
+        console.log('❌ Token no encontrado');
         console.log(error);
         return res.status(404).send('Token no encontrado');
     }
 
-    const token = data.device_token;
-
-
-    // Enviar la notificación push usando Firebase Admin SDK
     try {
-        const message = {
-            notification: {
-                title: title,
-                body: message,
-            },
-            token: token,
-        };
+        // Enviar a cada token del usuario
+        for (const row of data) {
+            const token = row.device_token;
 
-        // Enviar la notificación
-        const response = await admin.messaging().send(message);
-        console.log('Notificación enviada:', response);
-        res.send({ success: true, message: 'Notificación enviada' });
-    } catch (error) {
-        console.error('Error al enviar la notificación:', error);
+            const notificationPayload = {
+                notification: {
+                    title: title,
+                    body: message,
+                },
+                token: token,
+            };
+
+            const response = await admin.messaging().send(notificationPayload);
+            console.log('✅ Notificación enviada a', token, response);
+        }
+
+        res.send({ success: true, message: 'Notificaciones enviadas' });
+    } catch (err) {
+        console.error('❌ Error al enviar notificaciones:', err);
         res.status(500).send('Error al enviar la notificación');
     }
 });
+
 
 
 
