@@ -51,7 +51,7 @@ app.post('/register-device', async (req, res) => {
     // Guardar el token en la base de datos (en este caso usando Supabase como ejemplo)
     const { data, error } = await supabase
         .from('user_tokens')
-        .upsert([{ user_id: userId, token }]);
+        .upsert([{ user_id: userId, device_token: token }]);
 
     if (error) {
         return res.status(500).send('Error al guardar el token');
@@ -71,7 +71,7 @@ app.post('/send-push-notification', async (req, res) => {
     // Obtener el token del dispositivo desde la base de datos
     const { data, error } = await supabase
         .from('user_tokens')
-        .select('token')
+        .select('device_token')
         .eq('user_id', userId)
         .single();
 
