@@ -8,7 +8,6 @@ import { createClient } from '@supabase/supabase-js';
 import { notifyUserStatus } from './mailer.js';
 import fs from 'fs';
 import dotenv from 'dotenv';
-import cors from 'cors';
 
 const corsOptions = {
     origin: ['capacitor://localhost', 'http://localhost', 'http://localhost:8100'], // Orígenes permitidos
