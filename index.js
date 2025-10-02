@@ -21,7 +21,8 @@ const app = express();
 app.use(cors(corsOptions));
 
 // Asegúrate de manejar OPTIONS para todas las rutas (preflight)
-app.options('*', cors(corsOptions));
+app.options('/*', cors(corsOptions));
+
 app.use(bodyParser.json());
 dotenv.config();
 
