@@ -30,6 +30,7 @@ admin.initializeApp({
         clientEmail: process.env.GOOGLE_CLIENT_EMAIL,
         // Reemplazamos los \n literales por saltos de línea reales
         privateKey: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+
     }),
 });
 // Inicializar Supabase
