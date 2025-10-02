@@ -83,6 +83,8 @@ const supabase = createClient(
 app.post('/register-device', async (req, res) => {
     const { token, userId } = req.body;
 
+    console.log(token, userId);
+
     if (!token || !userId) {
         return res.status(400).send('Faltan parámetros');
     }
