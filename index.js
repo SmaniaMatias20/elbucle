@@ -16,9 +16,9 @@ const corsOptions = {
     credentials: true, // si usas cookies o auth con credenciales
 };
 
-app.use(cors(corsOptions));
 
 const app = express();
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 dotenv.config();
 
