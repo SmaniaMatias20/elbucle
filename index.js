@@ -56,22 +56,23 @@ import admin from 'firebase-admin';
 import { createClient } from '@supabase/supabase-js';
 import { notifyUserStatus } from './mailer.js';
 import fs from 'fs';
-
+import dotenv from 'dotenv';
 // Si estás utilizando ESModules, deberías usar 'import'. 
 // Si no, asegúrate de que tu 'package.json' tenga "type": "module".
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
+dotenv.config();
 
-// Cargar el archivo JSON de configuración de Firebase
-const serviceAccount = JSON.parse(fs.readFileSync('./serviceAccountKey.json', 'utf8'));
-
-// Inicializar Firebase Admin
 admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+    credential: admin.credential.cert({
+        projectId: process.env.GOOGLE_PROJECT_ID,
+        clientEmail: process.env.GOOGLE_CLIENT_EMAIL,
+        // Reemplazamos los \n literales por saltos de línea reales
+        privateKey: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    }),
 });
-
 // Inicializar Supabase
 const supabase = createClient(
     'https://dgnvjlzhaoxhaftpdurq.supabase.co',
