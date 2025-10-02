@@ -64,6 +64,7 @@ app.post('/register-device', async (req, res) => {
 app.post('/send-push-notification', async (req, res) => {
     const { userId, title, message } = req.body;
 
+    console.log(userId, title, message);
     if (!userId || !title || !message) {
         return res.status(400).send('Faltan parámetros');
     }
@@ -76,10 +77,13 @@ app.post('/send-push-notification', async (req, res) => {
         .single();
 
     if (error || !data) {
+        console.log(data);
+        console.log(error);
         return res.status(404).send('Token no encontrado');
     }
 
-    const token = data.token;
+    const token = data.device_token;
+
 
     // Enviar la notificación push usando Firebase Admin SDK
     try {
