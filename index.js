@@ -11,7 +11,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const corsOptions = {
-    origin: ['capacitor://localhost', 'http://localhost', 'https://localhost'], // incluye tus orígenes reales
+    origin: ['capacitor://localhost', 'http://localhost:4200', 'https://localhost'], // incluye tus orígenes reales
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
