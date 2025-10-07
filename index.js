@@ -8,6 +8,7 @@ import { createClient } from '@supabase/supabase-js';
 import { notifyUserStatus } from './mailer.js';
 import fs from 'fs';
 import dotenv from 'dotenv';
+dotenv.config();
 
 const corsOptions = {
     origin: ['capacitor://localhost', 'http://localhost', 'https://localhost'], // incluye tus orígenes reales
@@ -22,7 +23,6 @@ app.use(cors(corsOptions));
 
 console.log("PRIVATE KEY", process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'));
 app.use(bodyParser.json());
-dotenv.config();
 
 admin.initializeApp({
     credential: admin.credential.cert({
@@ -88,12 +88,28 @@ app.post('/send-push-notification', async (req, res) => {
             const token = row.device_token;
 
             const notificationPayload = {
+                token,
                 notification: {
-                    title: title,
+                    title,
                     body: message,
                 },
-                token: token,
+                android: {
+                    notification: {
+                        channelId: 'default',
+                        priority: 'high',
+                        sound: 'default',
+                    },
+                    priority: 'high',
+                },
+                apns: {
+                    payload: {
+                        aps: {
+                            sound: 'default',
+                        },
+                    },
+                },
             };
+
 
             const response = await admin.messaging().send(notificationPayload);
             console.log('✅ Notificación enviada a', token, response);
@@ -105,15 +121,6 @@ app.post('/send-push-notification', async (req, res) => {
         res.status(500).send('Error al enviar la notificación');
     }
 });
-
-
-
-
-
-
-
-
-
 
 
 // Endpoint para enviar el mail de confirmación de registro
