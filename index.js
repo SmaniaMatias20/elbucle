@@ -10,18 +10,23 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 dotenv.config();
 
+// const corsOptions = {
+//     origin: ['capacitor://localhost', 'http://localhost:4200', 'https://localhost'], // incluye tus orígenes reales
+//     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//     allowedHeaders: ['Content-Type', 'Authorization'],
+//     credentials: true,
+// };
+
 const corsOptions = {
-    origin: ['capacitor://localhost', 'http://localhost:4200', 'https://localhost'], // incluye tus orígenes reales
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
 };
 
 const app = express();
 // Usa CORS globalmente
 app.use(cors(corsOptions));
 
-console.log("PRIVATE KEY", process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'));
 app.use(bodyParser.json());
 
 admin.initializeApp({
