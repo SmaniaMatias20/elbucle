@@ -381,6 +381,8 @@ app.post('/send-push-notification-owner-and-supervisor', async (req, res) => {
 app.post('/send-confirmation-mail', async (req, res) => {
     const { name, email, statusString } = req.body;
 
+    console.log(req.body);
+
     // Validar parámetros
     if (!name || !email) {
         return res.status(400).send('Faltan parámetros');
@@ -392,6 +394,7 @@ app.post('/send-confirmation-mail', async (req, res) => {
     try {
         await notifyUserStatus(user, statusString);
         res.send({ success: true, message: 'Correo enviado' });
+        console.log('Correo enviado');
     } catch (error) {
         console.error('Error enviando correo:', error);
         res.status(500).send('Error al enviar el correo');
