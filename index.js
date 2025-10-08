@@ -127,6 +127,99 @@ app.post('/send-push-notification', async (req, res) => {
     }
 });
 
+app.post('/send-push-notification-waitress', async (req, res) => {
+    const { title, message, userIds } = req.body;
+
+    console.log('📣 Enviando notificación a mozos:', { title, message, userIds });
+
+    if (!title || !message) {
+        return res.status(400).send('Faltan parámetros');
+    }
+
+    try {
+        let targetUserIds = [];
+
+        // Si el frontend no envía los IDs, obtenerlos desde Supabase
+        if (!userIds || userIds.length === 0) {
+            const { data: users, error: userError } = await supabase
+                .from('users')
+                .select('id')
+                .eq('role', 'mozo');
+
+            if (userError) {
+                console.error('❌ Error obteniendo mozos:', userError);
+                return res.status(500).send('Error obteniendo mozos');
+            }
+
+            targetUserIds = users.map(u => u.id);
+        } else {
+            targetUserIds = userIds;
+        }
+
+        if (targetUserIds.length === 0) {
+            return res.status(404).send('No se encontraron mozos');
+        }
+
+        // Obtener todos los tokens de los mozos
+        const { data: tokensData, error: tokensError } = await supabase
+            .from('user_tokens')
+            .select('device_token')
+            .in('user_id', targetUserIds);
+
+        if (tokensError) {
+            console.error('❌ Error obteniendo tokens:', tokensError);
+            return res.status(500).send('Error obteniendo tokens');
+        }
+
+        if (!tokensData || tokensData.length === 0) {
+            console.log('⚠️ No se encontraron tokens de mozos');
+            return res.status(404).send('No se encontraron tokens de mozos');
+        }
+
+        // Enviar notificación a cada token
+        for (const row of tokensData) {
+            const token = row.device_token;
+
+            const notificationPayload = {
+                token,
+                notification: {
+                    title,
+                    body: message,
+                },
+                android: {
+                    notification: {
+                        channelId: 'default',
+                        priority: 'high',
+                        sound: 'default',
+                    },
+                    priority: 'high',
+                },
+                apns: {
+                    payload: {
+                        aps: {
+                            sound: 'default',
+                        },
+                    },
+                },
+            };
+
+            try {
+                const response = await admin.messaging().send(notificationPayload);
+                console.log('✅ Notificación enviada a mozo con token:', token, response);
+            } catch (sendErr) {
+                console.error('❌ Error enviando a token específico:', token, sendErr);
+            }
+        }
+
+        res.send({ success: true, message: 'Notificaciones enviadas a todos los mozos' });
+
+    } catch (err) {
+        console.error('❌ Error general al enviar notificaciones a mozos:', err);
+        res.status(500).send('Error al enviar las notificaciones a mozos');
+    }
+});
+
+
 
 // Endpoint para enviar el mail de confirmación de registro
 app.post('/send-confirmation-mail', async (req, res) => {
