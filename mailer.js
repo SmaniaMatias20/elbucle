@@ -3,16 +3,13 @@ const path = require("path");
 require('dotenv').config();
 
 const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
+    host: 'smtp.gmail.com',
     port: 465,
     secure: true,
     auth: {
         user: process.env.EMAIL,
-        pass: process.env.APP_PASSWORD,
+        pass: process.env.PASS,
     },
-    connectionTimeout: 20000,
-    greetingTimeout: 20000,
-    socketTimeout: 20000,
 });
 
 transporter.verify((error, success) => {
@@ -22,12 +19,6 @@ transporter.verify((error, success) => {
         console.log("✅ Servidor SMTP listo para enviar correos");
     }
 });
-
-transporter.verify((error, success) => {
-    if (error) console.error("❌ SMTP Error:", error);
-    else console.log("✅ SMTP listo en Render");
-});
-
 
 
 async function notifyUserStatus(user, statusString) {
