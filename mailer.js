@@ -18,6 +18,12 @@ transporter.verify((error, success) => {
     }
 });
 
+transporter.verify((error, success) => {
+    if (error) console.error("❌ SMTP Error:", error);
+    else console.log("✅ SMTP listo en Render");
+});
+
+
 
 async function notifyUserStatus(user, statusString) {
     console.log(user, statusString);
