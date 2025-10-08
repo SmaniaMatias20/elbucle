@@ -18,7 +18,7 @@ dotenv.config();
 // };
 
 const corsOptions = {
-    origin: '*',
+    origin: ['capacitor://localhost', 'http://localhost:4200', 'https://localhost', 'null'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 };
