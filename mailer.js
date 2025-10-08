@@ -3,23 +3,23 @@ const path = require("path");
 require('dotenv').config();
 
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
+    host: "smtp.sendgrid.net",
     port: 587,
     secure: false, // STARTTLS
     auth: {
-        user: process.env.EMAIL,
-        pass: process.env.PASS,
+        user: "apikey", // literal "apikey"
+        pass: process.env.SENDGRID_API_KEY,
     },
 });
 
-transporter.verify((error, success) => {
-    if (error) {
-        console.error("❌ Error de conexión SMTP:", error);
+// Verificar conexión
+transporter.verify((err, success) => {
+    if (err) {
+        console.error("❌ Error SMTP SendGrid:", err);
     } else {
-        console.log("✅ Servidor SMTP listo para enviar correos");
+        console.log("✅ Conexión SendGrid lista para enviar correos");
     }
 });
-
 
 async function notifyUserStatus(user, statusString) {
     console.log(user, statusString);
