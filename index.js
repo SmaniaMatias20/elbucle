@@ -29,6 +29,8 @@ app.use(cors(corsOptions));
 
 app.use(bodyParser.json());
 
+app.use('/public', express.static('public'));
+
 admin.initializeApp({
     credential: admin.credential.cert({
         projectId: process.env.GOOGLE_PROJECT_ID,

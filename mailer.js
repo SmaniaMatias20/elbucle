@@ -15,9 +15,11 @@ async function notifyUserStatus(user, statusString) {
     return;
   }
 
-  const imagePath = path.join(__dirname, 'bucle.png');
-  const imageBase64 = fs.readFileSync(imagePath).toString('base64');
-  const imageSrc = `data:image/png;base64,${imageBase64}`;
+  // const imagePath = path.join(__dirname, 'bucle.png');
+  // const imageBase64 = fs.readFileSync(imagePath).toString('base64');
+  // const imageSrc = `data:image/png;base64,${imageBase64}`;
+  const imageSrc = `https://elbucle.onrender.com/public/bucle.png`;
+
 
   let mensaje = "";
 
@@ -80,13 +82,6 @@ async function notifyUserStatus(user, statusString) {
           Nuestro equipo revisa cuidadosamente cada registro para garantizar la mejor experiencia para todos los usuarios.
           Si considera que se trata de un error o desea obtener más información, puede ponerse en contacto con nosotros.
         </p>
-
-        <div style="text-align:center; margin:30px 0;">
-          <a href="https://elbucle.com/contacto" 
-            style="background-color:#dc3545; color:#ffffff; text-decoration:none; padding:14px 28px; border-radius:6px; font-weight:bold; font-size:16px; display:inline-block;">
-            Contactar soporte
-          </a>
-        </div>
 
         <p style="margin-top:30px; font-size:15px;">
           Atentamente,<br>
