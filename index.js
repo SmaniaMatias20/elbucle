@@ -5,7 +5,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import admin from 'firebase-admin';
 import { createClient } from '@supabase/supabase-js';
-import { notifyUserStatus } from './mailer.js';
+import { notifyUserStatus, sendReservationConfirmationEmail, sendReservationRejectionEmail } from './mailer.js';
 import fs from 'fs';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -402,6 +402,36 @@ app.post('/send-confirmation-mail', async (req, res) => {
         res.status(500).send('Error al enviar el correo');
     }
 });
+
+app.post('/confirm-reservation', async (req, res) => {
+    const { reservation } = req.body;
+
+    if (!reservation) {
+        return res.status(400).send('Faltan parámetros');
+    }
+
+    console.log('Reserva recibida en backend:', reservation);
+
+    await sendReservationConfirmationEmail(reservation);
+
+    res.status(200).send({ message: 'Reserva confirmada correctamente' });
+});
+
+
+app.post('/reject-reservation', async (req, res) => {
+    const { reservation, rejectReason } = req.body;
+
+    if (!reservation) {
+        return res.status(400).send('Faltan parámetros');
+    }
+
+    console.log('Reserva rechazada en backend:', reservation);
+
+    await sendReservationRejectionEmail(reservation, rejectReason);
+
+    res.status(200).send({ message: 'Reserva rechazada correctamente' });
+});
+
 
 // Configurar el puerto y levantar el servidor
 const PORT = process.env.PORT || 3000;

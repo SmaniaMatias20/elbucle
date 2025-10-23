@@ -15,12 +15,6 @@ async function notifyUserStatus(user, statusString) {
     return;
   }
 
-  // const imagePath = path.join(__dirname, 'bucle.png');
-  // const imageBase64 = fs.readFileSync(imagePath).toString('base64');
-  // const imageSrc = `data:image/png;base64,${imageBase64}`;
-  const imageSrc = `https://elbucle.onrender.com/public/bucle.png`;
-
-
   let mensaje = "";
 
   if (statusString === "activo") {
@@ -156,76 +150,156 @@ async function notifyUserStatus(user, statusString) {
   }
 }
 
+/**
+ * Envía un correo al cliente notificando que su reserva fue confirmada.
+ * @param {Object} reservation - Objeto de la reserva.
+ */
+async function sendReservationConfirmationEmail(reservation) {
+  if (!reservation || !reservation.clientEmail) {
+    console.log("⚠️ No se puede enviar email: falta información del cliente.");
+    return;
+  }
+
+  const { clientName, clientEmail, tableNumber, selected_date } = reservation;
+
+  const htmlMessage = `
+<div style="background-color:#1E1C1A; padding:40px 0; font-family: Arial, sans-serif; color:#FFDAB3;">
+  <div style="max-width:600px; margin:0 auto; background-color:#2A2725; border-radius:10px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.2);">
+
+    <!-- Header con logo infinito -->
+    <div style="background-color:#28a745; padding:20px; text-align:center;">
+      <span style="
+        display:inline-block;
+        color:#f4d35e;
+        font-size:80px;
+        font-weight:bold;
+        vertical-align:middle;
+        line-height:1;
+      ">∞</span>
+      <h1 style="color:#ffffff; margin:10px 0 0; font-size:28px;">Reserva Confirmada</h1>
+    </div>
+
+    <!-- Body -->
+    <div style="padding:30px; color:#FFDAB3;">
+      <p style="font-size:16px;">Hola <strong>${clientName}</strong>,</p>
+      <p style="font-size:16px; line-height:1.6;">
+        ¡Tu reserva en <strong>El Bucle</strong> ha sido <span style="color:#28a745; font-weight:bold;">confirmada</span> con éxito!
+      </p>
+      <ul style="list-style:none; padding:0; font-size:16px;">
+        <li><strong>Mesa:</strong> ${tableNumber}</li>
+        <li><strong>Fecha y hora:</strong> ${selected_date}</li>
+      </ul>
+      <p style="font-size:16px; line-height:1.6;">
+        Te esperamos para que disfrutes de nuestra experiencia. Gracias por confiar en nosotros.
+      </p>
+      <p style="margin-top:30px; font-size:15px;">
+        Atentamente,<br>
+        <strong>El equipo de El Bucle</strong>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="background-color:#1E1C1A; padding:20px; text-align:center; font-size:13px; color:#777;">
+      <p style="margin:0;">© ${new Date().getFullYear()} El Bucle. Todos los derechos reservados.</p>
+      <p style="margin:5px 0 0;">Este correo fue enviado automáticamente, por favor no lo responda directamente.</p>
+    </div>
+
+  </div>
+</div>
+  `;
+
+  const msg = {
+    to: clientEmail,
+    from: process.env.EMAIL,
+    subject: `Reserva confirmada - Mesa ${tableNumber}`,
+    html: htmlMessage,
+  };
+
+  try {
+    await sgMail.send(msg);
+    console.log(`✅ Correo de confirmación enviado a ${clientEmail}`);
+  } catch (error) {
+    console.error(`❌ Error enviando correo a ${clientEmail}:`, error);
+  }
+}
 
 
+/**
+ * Envía un correo al cliente notificando que su reserva fue rechazada.
+ * @param {Object} reservation - Objeto de la reserva.
+ * @param {string} rejectReason - Motivo de rechazo de la reserva.
+ */
+async function sendReservationRejectionEmail(reservation, rejectReason) {
+  if (!reservation || !reservation.clientEmail) {
+    console.log("⚠️ No se puede enviar email: falta información del cliente.");
+    return;
+  }
+
+  const { clientName, clientEmail, tableNumber, selected_date } = reservation;
+
+  const htmlMessage = `
+<div style="background-color:#1E1C1A; padding:40px 0; font-family: Arial, sans-serif; color:#FFDAB3;">
+  <div style="max-width:600px; margin:0 auto; background-color:#2A2725; border-radius:10px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.2);">
+
+    <!-- Header con logo infinito -->
+    <div style="background-color:#dc3545; padding:20px; text-align:center;">
+      <span style="
+        display:inline-block;
+        color:#f4d35e;
+        font-size:80px;
+        font-weight:bold;
+        vertical-align:middle;
+        line-height:1;
+      ">∞</span>
+      <h1 style="color:#ffffff; margin:10px 0 0; font-size:28px;">Reserva Rechazada</h1>
+    </div>
+
+    <!-- Body -->
+    <div style="padding:30px; color:#FFDAB3;">
+      <p style="font-size:16px;">Hola <strong>${clientName}</strong>,</p>
+      <p style="font-size:16px; line-height:1.6;">
+        Lamentamos informarte que tu reserva en <strong>El Bucle</strong> ha sido <span style="color:#dc3545; font-weight:bold;">rechazada</span>.
+      </p>
+      <ul style="list-style:none; padding:0; font-size:16px;">
+        <li><strong>Mesa:</strong> ${tableNumber}</li>
+        <li><strong>Fecha y hora:</strong> ${selected_date}</li>
+        <li><strong>Motivo:</strong> ${rejectReason || "No especificado"}</li>
+      </ul>
+      <p style="font-size:16px; line-height:1.6;">
+        Si tienes dudas o deseas más información, puedes contactarnos respondiendo a este correo.
+      </p>
+      <p style="margin-top:30px; font-size:15px;">
+        Atentamente,<br>
+        <strong>El equipo de El Bucle</strong>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="background-color:#1E1C1A; padding:20px; text-align:center; font-size:13px; color:#777;">
+      <p style="margin:0;">© ${new Date().getFullYear()} El Bucle. Todos los derechos reservados.</p>
+      <p style="margin:5px 0 0;">Este correo fue enviado automáticamente, por favor no lo responda directamente.</p>
+    </div>
+
+  </div>
+</div>
+  `;
+
+  const msg = {
+    to: clientEmail,
+    from: process.env.EMAIL,
+    subject: `❌ Tu reserva en El Bucle ha sido rechazada - Mesa ${tableNumber}`,
+    html: htmlMessage,
+  };
+
+  try {
+    await sgMail.send(msg);
+    console.log(`✅ Correo de rechazo enviado a ${clientEmail}`);
+  } catch (error) {
+    console.error(`❌ Error enviando correo a ${clientEmail}:`, error);
+  }
+}
 
 
+module.exports = { notifyUserStatus, sendReservationConfirmationEmail, sendReservationRejectionEmail };
 
 
-
-
-
-
-// async function notifyUserStatus(user, statusString) {
-//     console.log(user, statusString);
-//     const { name, email } = user;
-
-//     if (!email) {
-//         console.log("⚠️ Este usuario no tiene email, no se envía notificación.");
-//         return;
-//     }
-
-//     let mensaje = "";
-
-//     if (statusString === "activo") {
-//         mensaje = `
-//         <div style="font-family: Arial, sans-serif; color: #333;">
-//           <h2 style="color: #28a745;">✅ Registro Aceptado</h2>
-//           <p>Estimado/a <strong>${name}</strong>,</p>
-//           <p>¡Felicidades! Su registro en <strong>El Bucle</strong> ha sido aceptado. 
-//           Ahora puede iniciar sesión y disfrutar de nuestros servicios.</p>
-//           <p>Atentamente,<br><strong>El equipo de El Bucle</strong></p>
-//           <img src="cid:logoimg" alt="logo" width="120" height="120">
-//         </div>
-//         `;
-//     } else if (statusString === "inactivo") {
-//         mensaje = `
-//         <div style="font-family: Arial, sans-serif; color: #333;">
-//           <h2 style="color: #dc3545;">❌ Registro Rechazado</h2>
-//           <p>Estimado/a <strong>${name}</strong>,</p>
-//           <p>Lamentamos informarle que su registro en <strong>El Bucle</strong> no fue aprobado.</p>
-//           <p>Si cree que hubo un error, por favor contáctenos.</p>
-//           <p>Atentamente,<br><strong>El equipo de El Bucle</strong></p>
-//           <img src="cid:logoimg" alt="logo" width="120" height="120">
-//         </div>
-//         `;
-//     }
-
-//     // Leer la imagen y convertirla a base64 para SendGrid
-//     const imageContent = fs.readFileSync(path.join(__dirname, 'bucle.png')).toString('base64');
-
-//     const msg = {
-//         to: email,
-//         from: process.env.EMAIL, // tu correo verificado en SendGrid
-//         subject: "Estado de su registro en El Bucle",
-//         html: mensaje,
-//         attachments: [
-//             {
-//                 content: imageContent,
-//                 filename: "bucle.png",
-//                 type: "image/png",
-//                 disposition: "inline",
-//                 content_id: "logoimg"
-//             }
-//         ]
-//     };
-
-//     try {
-//         await sgMail.send(msg);
-//         console.log(`✅ Correo enviado a ${email} (${statusString})`);
-//     } catch (error) {
-//         console.error(`❌ Error enviando correo a ${email}:`, error);
-//     }
-// }
-
-module.exports = { notifyUserStatus };
