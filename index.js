@@ -5,7 +5,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import admin from 'firebase-admin';
 import { createClient } from '@supabase/supabase-js';
-import { notifyUserStatus, sendReservationConfirmationEmail, sendReservationRejectionEmail } from './mailer.js';
+import { notifyUserStatus, sendReservationConfirmationEmail, sendReservationRejectionEmail, saveOrderPDF, sendOrderEmail } from './mailer.js';
 import fs from 'fs';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -430,6 +430,28 @@ app.post('/reject-reservation', async (req, res) => {
     await sendReservationRejectionEmail(reservation, rejectReason);
 
     res.status(200).send({ message: 'Reserva rechazada correctamente' });
+});
+
+
+app.post('/send-order-pdf', async (req, res) => {
+    const { pdfBase64, client } = req.body;
+
+    if (!pdfBase64 || !client) {
+        return res.status(400).send('Faltan parámetros');
+    }
+
+    try {
+        // 1️⃣ Guardar PDF en el servidor
+        await saveOrderPDF(pdfBase64);
+
+        // 2️⃣ Enviar correo al cliente con adjunto
+        await sendOrderEmail(client, pdfBase64);
+
+        res.send({ success: true, message: 'Factura guardada y enviada por email' });
+    } catch (err) {
+        console.error('❌ Error general:', err);
+        res.status(500).send('Error procesando factura');
+    }
 });
 
 

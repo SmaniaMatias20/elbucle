@@ -3,6 +3,7 @@ const sgMail = require('@sendgrid/mail');
 const path = require("path");
 require('dotenv').config();
 const fs = require('fs');
+const { send } = require("process");
 
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -299,7 +300,53 @@ async function sendReservationRejectionEmail(reservation, rejectReason) {
   }
 }
 
+// ===============================
+// 🔹 FUNCIÓN 1: guardar PDF
+// ===============================
+async function saveOrderPDF(pdfBase64) {
+  try {
+    const filePath = path.join(process.cwd(), 'public', 'order.pdf');
+    fs.writeFileSync(filePath, Buffer.from(pdfBase64, 'base64'));
+    console.log(`✅ PDF guardado en: ${filePath}`);
+    return filePath;
+  } catch (err) {
+    console.error('❌ Error guardando PDF:', err);
+    throw new Error('Error guardando PDF');
+  }
+}
 
-module.exports = { notifyUserStatus, sendReservationConfirmationEmail, sendReservationRejectionEmail };
+// ===============================
+// 🔹 FUNCIÓN 2: enviar correo con PDF adjunto
+// ===============================
+async function sendOrderEmail(client, pdfBase64) {
+  const msg = {
+    to: client.email || client, // acepta string o { email }
+    from: process.env.EMAIL,
+    subject: 'Tu pedido en El Bucle',
+    html: `
+      <h2>¡Gracias por tu compra!</h2>
+      <p>Adjuntamos tu factura en PDF correspondiente al pedido realizado en El Bucle.</p>
+      <p>¡Esperamos verte pronto!</p>
+    `,
+    attachments: [
+      {
+        content: pdfBase64,
+        filename: 'Factura_ElBucle.pdf',
+        type: 'application/pdf',
+        disposition: 'attachment',
+      },
+    ],
+  };
+
+  try {
+    await sgMail.send(msg);
+    console.log(`✅ Correo enviado a ${client.email || client}`);
+  } catch (error) {
+    console.error('❌ Error enviando correo:', error);
+    throw new Error('Error enviando correo');
+  }
+}
+
+module.exports = { notifyUserStatus, sendReservationConfirmationEmail, sendReservationRejectionEmail, saveOrderPDF, sendOrderEmail };
 
 
