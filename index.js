@@ -2,7 +2,6 @@
 
 import express from 'express';
 import cors from 'cors';
-import bodyParser from 'body-parser';
 import admin from 'firebase-admin';
 import { createClient } from '@supabase/supabase-js';
 import { notifyUserStatus, sendReservationConfirmationEmail, sendReservationRejectionEmail, saveOrderPDF, sendOrderEmail } from './mailer.js';
@@ -24,16 +23,17 @@ const corsOptions = {
 };
 
 const app = express();
-// Usa CORS globalmente
-app.use(cors(corsOptions));
 
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
 
-app.use('/public', express.static('public'));
 
-// 🔹 Aumentar el límite máximo permitido a 50 MB
+// 🔹 Aumenta el límite máximo permitido a 50 MB
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+// Usa CORS globalmente
+app.use(cors(corsOptions));
+// Archivos estáticos
+app.use('/public', express.static('public'));
 
 admin.initializeApp({
     credential: admin.credential.cert({
