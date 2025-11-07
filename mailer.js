@@ -320,7 +320,7 @@ async function saveOrderPDF(pdfBase64) {
 // ===============================
 async function sendOrderEmail(client, pdfBase64) {
   const msg = {
-    to: client.email || client, // acepta string o { email }
+    to: client.email || "matiasezequielsmania@gmail.com",
     from: process.env.EMAIL,
     subject: 'Tu pedido en El Bucle',
     html: `
@@ -342,7 +342,7 @@ async function sendOrderEmail(client, pdfBase64) {
 
     <!-- Body -->
     <div style="padding:35px; color:#FFDAB3;">
-      <p style="font-size:16px;">Hola <strong>${client.name}</strong>,</p>
+      <p style="font-size:16px;">Hola <strong>${client.firstName || "Mariano Gomez"}</strong>,</p>
 
       <p style="font-size:16px; line-height:1.6;">
         Queremos agradecerte por tu reciente compra en <strong>El Bucle</strong>.  
