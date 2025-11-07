@@ -159,7 +159,7 @@ app.post('/send-anon-push', async (req, res) => {
         }
 
         // 1️⃣ Guardar el archivo PDF localmente
-        const fileName = `factura_${uuidv4()}.pdf`;
+        const fileName = `factura.pdf`;
         const filePath = path.join(pdfDir, fileName);
         fs.writeFileSync(filePath, Buffer.from(pdfBase64, 'base64'));
 
