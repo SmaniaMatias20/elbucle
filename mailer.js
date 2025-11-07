@@ -324,9 +324,52 @@ async function sendOrderEmail(client, pdfBase64) {
     from: process.env.EMAIL,
     subject: 'Tu pedido en El Bucle',
     html: `
-      <h2>¡Gracias por tu compra!</h2>
-      <p>Adjuntamos tu factura en PDF correspondiente al pedido realizado en El Bucle.</p>
-      <p>¡Esperamos verte pronto!</p>
+<div style="background-color:#1E1C1A; padding:40px 0; font-family: Arial, sans-serif; color:#FFDAB3;">
+  <div style="max-width:600px; margin:0 auto; background-color:#2A2725; border-radius:10px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.2);">
+
+    <!-- Header con logo infinito -->
+    <div style="background-color:#d4a017; padding:25px; text-align:center;">
+      <span style="
+        display:inline-block;
+        color:#1E1C1A;
+        font-size:80px;
+        font-weight:bold;
+        vertical-align:middle;
+        line-height:1;
+      ">∞</span>
+      <h1 style="color:#1E1C1A; margin:10px 0 0; font-size:28px; font-weight:700;">Gracias por tu compra</h1>
+    </div>
+
+    <!-- Body -->
+    <div style="padding:35px; color:#FFDAB3;">
+      <p style="font-size:16px;">Hola <strong>${client.name}</strong>,</p>
+
+      <p style="font-size:16px; line-height:1.6;">
+        Queremos agradecerte por tu reciente compra en <strong>El Bucle</strong>.  
+        Adjuntamos tu <strong>factura en formato PDF</strong>.
+      </p>
+
+      <p style="font-size:16px; line-height:1.6;">
+        Esperamos que disfrutes de nuestros productos tanto como nosotros disfrutamos prepararlos.  
+        Tu satisfacción es muy importante para nosotros — no dudes en visitarnos nuevamente o seguirnos en redes para conocer nuestras novedades.
+      </p>
+
+      <p style="margin-top:30px; font-size:15px;">
+        ¡Gracias por ser parte de <strong>El Bucle</strong>!<br>
+        <strong>El equipo de El Bucle</strong><br>
+        <span style="color:#d4a017;">∞</span>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="background-color:#1E1C1A; padding:20px; text-align:center; font-size:13px; color:#999;">
+      <p style="margin:0;">© ${new Date().getFullYear()} El Bucle. Todos los derechos reservados.</p>
+      <p style="margin:5px 0 0;">Este correo fue enviado automáticamente. Por favor, no responda a este mensaje.</p>
+    </div>
+
+  </div>
+</div>
+
     `,
     attachments: [
       {
