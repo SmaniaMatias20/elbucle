@@ -7,6 +7,8 @@ import { createClient } from '@supabase/supabase-js';
 import { notifyUserStatus, sendReservationConfirmationEmail, sendReservationRejectionEmail, saveOrderPDF, sendOrderEmail } from './mailer.js';
 import fs from 'fs';
 import dotenv from 'dotenv';
+import path from 'path';
+
 dotenv.config();
 
 // const corsOptions = {
@@ -132,6 +134,93 @@ app.post('/send-push-notification', async (req, res) => {
         res.status(500).send('Error al enviar la notificación');
     }
 });
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+// 🔹 Carpeta donde guardarás los PDFs localmente
+const pdfDir = path.join(process.cwd(), 'pdfs');
+
+// Asegúrate de que la carpeta exista
+if (!fs.existsSync(pdfDir)) {
+    fs.mkdirSync(pdfDir, { recursive: true });
+}
+
+// 🔹 Servir la carpeta "pdfs" como pública
+app.use('/pdfs', express.static(pdfDir));
+
+
+// 🔹 Endpoint para recibir PDF desde el front y enviar push
+app.post('/send-anon-push', async (req, res) => {
+    try {
+        const { pdfBase64, client, order } = req.body;
+
+        if (!pdfBase64 || !client || !order) {
+            return res.status(400).send('Faltan parámetros');
+        }
+
+        // 1️⃣ Guardar el archivo PDF localmente
+        const fileName = `factura_${uuidv4()}.pdf`;
+        const filePath = path.join(pdfDir, fileName);
+        fs.writeFileSync(filePath, Buffer.from(pdfBase64, 'base64'));
+
+        // URL pública para descargarlo
+        const downloadUrl = `https://elbucle.onrender.com/pdfs/${fileName}`;
+
+        // 2️⃣ Buscar el token del usuario anónimo
+        const { data: tokens, error } = await supabase
+            .from('user_tokens')
+            .select('device_token')
+            .eq('user_id', client.id);
+
+        if (error || !tokens?.length) {
+            console.log('❌ Token no encontrado para cliente anónimo');
+            return res.status(404).send('Token no encontrado');
+        }
+
+        // 3️⃣ Enviar push notification con enlace de descarga
+        for (const row of tokens) {
+            const token = row.device_token;
+
+            const payload = {
+                token,
+                notification: {
+                    title: 'Tu factura está lista 📄',
+                    body: 'Toca para descargar tu comprobante en PDF.',
+                },
+                data: {
+                    click_action: 'FLUTTER_NOTIFICATION_CLICK',
+                    downloadUrl, // el enlace del PDF
+                },
+                android: {
+                    notification: {
+                        sound: 'default',
+                        clickAction: 'FLUTTER_NOTIFICATION_CLICK',
+                    },
+                    priority: 'high',
+                },
+                apns: {
+                    payload: {
+                        aps: { sound: 'default' },
+                    },
+                    fcmOptions: {
+                        link: downloadUrl, // para iOS
+                    },
+                },
+            };
+
+            const response = await admin.messaging().send(payload);
+            console.log('✅ Notificación enviada a', token, response);
+        }
+
+        res.send({ success: true, downloadUrl });
+    } catch (err) {
+        console.error('❌ Error al enviar push con PDF:', err);
+        res.status(500).send('Error interno del servidor');
+    }
+});
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
 
 app.post('/send-push-notification-waitress', async (req, res) => {
     const { title, message, userIds } = req.body;
@@ -459,6 +548,7 @@ app.post('/send-push-notification-cocinero-and-bartender', async (req, res) => {
         res.status(500).send('Error al enviar las notificaciones a cocineros');
     }
 });
+
 
 
 // Endpoint para enviar el mail de confirmación de registro
