@@ -158,15 +158,19 @@ app.post('/send-anon-push', async (req, res) => {
             return res.status(400).send('Faltan parámetros');
         }
 
-        // 1️⃣ Guardar el archivo PDF localmente
-        const fileName = `factura.pdf`;
+        // 1️⃣ Guardar el PDF en el servidor
+        // Usa un nombre único para evitar sobrescribir facturas anteriores
+        const safeClientId = client.id || 'anonimo';
+        const fileName = `factura_${safeClientId}_${Date.now()}.pdf`;
         const filePath = path.join(pdfDir, fileName);
         fs.writeFileSync(filePath, Buffer.from(pdfBase64, 'base64'));
 
-        // URL pública para descargarlo
+        // URL pública del archivo (Render sirve /pdfs automáticamente)
         const downloadUrl = `https://elbucle.onrender.com/pdfs/${fileName}`;
+        console.log('✅ PDF guardado en:', filePath);
+        console.log('🔗 URL pública:', downloadUrl);
 
-        // 2️⃣ Buscar el token del usuario anónimo
+        // 2️⃣ Obtener el/los tokens del usuario anónimo desde Supabase
         const { data: tokens, error } = await supabase
             .from('user_tokens')
             .select('device_token')
@@ -177,7 +181,7 @@ app.post('/send-anon-push', async (req, res) => {
             return res.status(404).send('Token no encontrado');
         }
 
-        // 3️⃣ Enviar push notification con enlace de descarga
+        // 3️⃣ Enviar notificación push con enlace
         for (const row of tokens) {
             const token = row.device_token;
 
@@ -192,30 +196,31 @@ app.post('/send-anon-push', async (req, res) => {
                     downloadUrl, // el enlace del PDF
                 },
                 android: {
+                    priority: 'high',
                     notification: {
                         sound: 'default',
                         clickAction: 'FLUTTER_NOTIFICATION_CLICK',
                     },
-                    priority: 'high',
                 },
                 apns: {
                     payload: {
                         aps: { sound: 'default' },
                     },
-                    fcmOptions: {
-                        link: downloadUrl, // para iOS
-                    },
                 },
             };
 
-            const response = await admin.messaging().send(payload);
-            console.log('✅ Notificación enviada a', token, response);
+            try {
+                const response = await admin.messaging().send(payload);
+                console.log('✅ Notificación enviada a', token, response);
+            } catch (sendErr) {
+                console.error('❌ Error enviando a token:', token, sendErr.message);
+            }
         }
 
         res.send({ success: true, downloadUrl });
     } catch (err) {
         console.error('❌ Error al enviar push con PDF:', err);
-        res.status(500).send('Error interno del servidor');
+        res.status(500).send('Error interno del servidor: ' + err.message);
     }
 });
 
