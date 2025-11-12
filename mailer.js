@@ -164,10 +164,13 @@ async function sendReservationConfirmationEmail(reservation) {
   const { clientName, clientEmail, tableNumber, selected_date } = reservation;
 
   const htmlMessage = `
-<div style="background-color:#1E1C1A; padding:40px 0; font-family: Arial, sans-serif; color:#FFDAB3;">
-  <div style="max-width:600px; margin:0 auto; background-color:#2A2725; border-radius:10px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.2);">
+<div style="background-color:#181818; padding:40px 0; font-family: 'Poppins', Arial, sans-serif; color:#EDEDED;">
+  <!-- Importar fuentes -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 
-    <!-- Header con logo infinito -->
+  <div style="max-width:600px; margin:0 auto; background-color:#222; border-radius:14px; overflow:hidden; box-shadow:0 6px 16px rgba(0,0,0,0.35);">
+
+    <!-- Header con logo infinito (idéntico al original) -->
     <div style="background-color:#28a745; padding:20px; text-align:center;">
       <span style="
         display:inline-block;
@@ -177,36 +180,44 @@ async function sendReservationConfirmationEmail(reservation) {
         vertical-align:middle;
         line-height:1;
       ">∞</span>
-      <h1 style="color:#ffffff; margin:10px 0 0; font-size:28px;">Reserva Confirmada</h1>
+      <h1 style="color:#ffffff; margin:10px 0 0; font-size:30px; font-family:'Playfair Display', serif;">Reserva Confirmada</h1>
     </div>
 
     <!-- Body -->
-    <div style="padding:30px; color:#FFDAB3;">
-      <p style="font-size:16px;">Hola <strong>${clientName}</strong>,</p>
-      <p style="font-size:16px; line-height:1.6;">
-        ¡Tu reserva en <strong>El Bucle</strong> ha sido <span style="color:#28a745; font-weight:bold;">confirmada</span> con éxito!
+    <div style="padding:35px 30px; color:#EDEDED;">
+      <p style="font-size:17px; margin-bottom:12px;">Hola <strong style="color:#1fd678;">${clientName}</strong>,</p>
+      <p style="font-size:16px; line-height:1.7; margin-bottom:25px;">
+        ¡Tu reserva en <strong style="color:#fff;">El Bucle</strong> ha sido 
+        <span style="color:#1fd678; font-weight:600;">confirmada</span> con éxito!
       </p>
-      <ul style="list-style:none; padding:0; font-size:16px;">
-        <li><strong>Mesa:</strong> ${tableNumber}</li>
-        <li><strong>Fecha y hora:</strong> ${selected_date}</li>
-      </ul>
-      <p style="font-size:16px; line-height:1.6;">
-        Te esperamos para que disfrutes de nuestra experiencia. Gracias por confiar en nosotros.
+
+      <div style="background-color:#2a2a2a; border-left:4px solid #1fd678; padding:15px 20px; border-radius:8px; margin-bottom:25px;">
+        <ul style="list-style:none; padding:0; margin:0; font-size:15px;">
+          <li style="margin-bottom:6px;"><strong style="color:#fff;">Mesa:</strong> ${tableNumber}</li>
+          <li><strong style="color:#fff;">Fecha y hora:</strong> ${selected_date}</li>
+        </ul>
+      </div>
+
+      <p style="font-size:16px; line-height:1.7;">
+        Te esperamos para que disfrutes de nuestra experiencia gastronómica.  
+        Gracias por confiar en nosotros.
       </p>
-      <p style="margin-top:30px; font-size:15px;">
+
+      <p style="margin-top:35px; font-size:15px; color:#ccc;">
         Atentamente,<br>
-        <strong>El equipo de El Bucle</strong>
+        <strong style="color:#fff;">El equipo de El Bucle</strong>
       </p>
     </div>
 
     <!-- Footer -->
-    <div style="background-color:#1E1C1A; padding:20px; text-align:center; font-size:13px; color:#777;">
+    <div style="background-color:#1a1a1a; padding:20px; text-align:center; font-size:13px; color:#888;">
       <p style="margin:0;">© ${new Date().getFullYear()} El Bucle. Todos los derechos reservados.</p>
-      <p style="margin:5px 0 0;">Este correo fue enviado automáticamente, por favor no lo responda directamente.</p>
+      <p style="margin:6px 0 0;">Este correo fue enviado automáticamente, por favor no lo responda directamente.</p>
     </div>
 
   </div>
 </div>
+
   `;
 
   const msg = {

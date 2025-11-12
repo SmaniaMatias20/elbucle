@@ -150,6 +150,7 @@ app.use('/pdfs', express.static(pdfDir));
 
 
 // 🔹 Endpoint para recibir PDF desde el front y enviar push
+// 🔹 Endpoint para recibir PDF desde el front y enviar push
 app.post('/send-anon-push', async (req, res) => {
     try {
         const { pdfBase64, client, order } = req.body;
@@ -158,19 +159,18 @@ app.post('/send-anon-push', async (req, res) => {
             return res.status(400).send('Faltan parámetros');
         }
 
-        // 1️⃣ Guardar el PDF en el servidor
-        // Usa un nombre único para evitar sobrescribir facturas anteriores
+        // 1️⃣ Guardar el PDF
         const safeClientId = client.id || 'anonimo';
         const fileName = `factura_${safeClientId}_${Date.now()}.pdf`;
         const filePath = path.join(pdfDir, fileName);
         fs.writeFileSync(filePath, Buffer.from(pdfBase64, 'base64'));
 
-        // URL pública del archivo (Render sirve /pdfs automáticamente)
+        // 2️⃣ Crear URL pública
         const downloadUrl = `https://elbucle.onrender.com/pdfs/${fileName}`;
-        console.log('✅ PDF guardado en:', filePath);
+        console.log('✅ PDF guardado:', filePath);
         console.log('🔗 URL pública:', downloadUrl);
 
-        // 2️⃣ Obtener el/los tokens del usuario anónimo desde Supabase
+        // 3️⃣ Obtener tokens del cliente desde Supabase
         const { data: tokens, error } = await supabase
             .from('user_tokens')
             .select('device_token')
@@ -181,30 +181,24 @@ app.post('/send-anon-push', async (req, res) => {
             return res.status(404).send('Token no encontrado');
         }
 
-        // 3️⃣ Enviar notificación push con enlace
+        // 4️⃣ Enviar notificación tipo "data-only"
         for (const row of tokens) {
             const token = row.device_token;
 
             const payload = {
                 token,
-                notification: {
+                // 🔸 NOTA: NO incluimos el bloque "notification"
+                data: {
                     title: 'Tu factura está lista 📄',
                     body: 'Toca para descargar tu comprobante en PDF.',
-                },
-                data: {
-                    click_action: 'FLUTTER_NOTIFICATION_CLICK',
-                    downloadUrl, // el enlace del PDF
+                    downloadUrl, // Enlace del PDF
                 },
                 android: {
                     priority: 'high',
-                    notification: {
-                        sound: 'default',
-                        clickAction: 'FLUTTER_NOTIFICATION_CLICK',
-                    },
                 },
                 apns: {
                     payload: {
-                        aps: { sound: 'default' },
+                        aps: { contentAvailable: true },
                     },
                 },
             };
@@ -223,6 +217,7 @@ app.post('/send-anon-push', async (req, res) => {
         res.status(500).send('Error interno del servidor: ' + err.message);
     }
 });
+
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////
