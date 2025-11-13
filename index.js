@@ -207,29 +207,15 @@ app.post('/send-anon-push', async (req, res) => {
                 token,
                 notification: {
                     title: 'Tu factura está lista 📄',
-                    body: 'Toca para descargar tu comprobante en PDF.',
+                    body: 'Toca para descargar tu comprobante.',
                 },
                 data: {
-                    downloadUrl, // El enlace del PDF
+                    downloadUrl, // Enlace al PDF
                 },
-                android: {
-                    priority: 'high',
-                    notification: {
-                        clickAction: 'FLUTTER_NOTIFICATION_CLICK', // Si usás Capacitor, igual sirve
-                    },
-                },
-                apns: {
-                    payload: {
-                        aps: {
-                            alert: {
-                                title: 'Tu factura está lista 📄',
-                                body: 'Toca para descargar tu comprobante en PDF.',
-                            },
-                            sound: 'default',
-                        },
-                    },
-                },
+                android: { priority: 'high' },
+                apns: { payload: { aps: { contentAvailable: true } } },
             };
+
 
             try {
                 const response = await admin.messaging().send(payload);
