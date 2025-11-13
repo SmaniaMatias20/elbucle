@@ -163,6 +163,31 @@ async function sendReservationConfirmationEmail(reservation) {
 
   const { clientName, clientEmail, tableNumber, selected_date } = reservation;
 
+  // 1️⃣ Separar fecha y hora
+  const [datePart, timePart] = selected_date.split(", ");
+  const [day, month, year] = datePart.split("/").map(Number);
+  const [hours, minutes] = timePart.split(":").map(Number);
+
+  // 2️⃣ Crear el objeto Date (año 20xx)
+  const date = new Date(2000 + year, month - 1, day, hours, minutes);
+
+  // 3️⃣ Restar 3 horas
+  date.setHours(date.getHours() - 3);
+
+  // 4️⃣ Mostrar resultado en el mismo formato (si querés)
+  const adjusted =
+    date
+      .toLocaleString("es-AR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+      .replace(",", "");
+
+  console.log(adjusted); // 👉 por ejemplo: "13/11/25, 19:00"
+
   const htmlMessage = `
 <div style="background-color:#181818; padding:40px 0; font-family: 'Poppins', Arial, sans-serif; color:#EDEDED;">
   <!-- Importar fuentes -->
@@ -194,7 +219,7 @@ async function sendReservationConfirmationEmail(reservation) {
       <div style="background-color:#2a2a2a; border-left:4px solid #1fd678; padding:15px 20px; border-radius:8px; margin-bottom:25px;">
         <ul style="list-style:none; padding:0; margin:0; font-size:15px;">
           <li style="margin-bottom:6px;"><strong style="color:#fff;">Mesa:</strong> ${tableNumber}</li>
-          <li><strong style="color:#fff;">Fecha y hora:</strong> ${selected_date}</li>
+          <li><strong style="color:#fff;">Fecha y hora:</strong> ${adjusted}</li>
         </ul>
       </div>
 
