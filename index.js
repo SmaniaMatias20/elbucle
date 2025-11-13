@@ -185,20 +185,48 @@ app.post('/send-anon-push', async (req, res) => {
         for (const row of tokens) {
             const token = row.device_token;
 
+            // const payload = {
+            //     token,
+            //     // 🔸 NOTA: NO incluimos el bloque "notification"
+            //     data: {
+            //         title: 'Tu factura está lista 📄',
+            //         body: 'Toca para descargar tu comprobante en PDF.',
+            //         downloadUrl, // Enlace del PDF
+            //     },
+            //     android: {
+            //         priority: 'high',
+            //     },
+            //     apns: {
+            //         payload: {
+            //             aps: { contentAvailable: true },
+            //         },
+            //     },
+            // };
+
             const payload = {
                 token,
-                // 🔸 NOTA: NO incluimos el bloque "notification"
-                data: {
+                notification: {
                     title: 'Tu factura está lista 📄',
                     body: 'Toca para descargar tu comprobante en PDF.',
-                    downloadUrl, // Enlace del PDF
+                },
+                data: {
+                    downloadUrl, // El enlace del PDF
                 },
                 android: {
                     priority: 'high',
+                    notification: {
+                        clickAction: 'FLUTTER_NOTIFICATION_CLICK', // Si usás Capacitor, igual sirve
+                    },
                 },
                 apns: {
                     payload: {
-                        aps: { contentAvailable: true },
+                        aps: {
+                            alert: {
+                                title: 'Tu factura está lista 📄',
+                                body: 'Toca para descargar tu comprobante en PDF.',
+                            },
+                            sound: 'default',
+                        },
                     },
                 },
             };
