@@ -249,6 +249,32 @@ async function sendReservationRejectionEmail(reservation, rejectReason) {
 
   const { clientName, clientEmail, tableNumber, selected_date } = reservation;
 
+  // 1️⃣ Separar fecha y hora
+  const [datePart, timePart] = selected_date.split(", ");
+  const [day, month, year] = datePart.split("/").map(Number);
+  const [hours, minutes] = timePart.split(":").map(Number);
+
+  // 2️⃣ Crear el objeto Date (año 20xx)
+  const date = new Date(2000 + year, month - 1, day, hours, minutes);
+
+  // 3️⃣ Restar 3 horas
+  date.setHours(date.getHours() - 3);
+
+  // 4️⃣ Mostrar resultado en el mismo formato (si querés)
+  const adjusted =
+    date
+      .toLocaleString("es-AR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+      .replace(",", "");
+
+  console.log(adjusted); // 👉 por ejemplo: "13/11/25, 19:00"
+
+
   const htmlMessage = `
 <div style="background-color:#1E1C1A; padding:40px 0; font-family: Arial, sans-serif; color:#FFDAB3;">
   <div style="max-width:600px; margin:0 auto; background-color:#2A2725; border-radius:10px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.2);">
@@ -274,7 +300,7 @@ async function sendReservationRejectionEmail(reservation, rejectReason) {
       </p>
       <ul style="list-style:none; padding:0; font-size:16px;">
         <li><strong>Mesa:</strong> ${tableNumber}</li>
-        <li><strong>Fecha y hora:</strong> ${selected_date}</li>
+        <li><strong>Fecha y hora:</strong> ${adjusted}</li>
         <li><strong>Motivo:</strong> ${rejectReason || "No especificado"}</li>
       </ul>
       <p style="font-size:16px; line-height:1.6;">
